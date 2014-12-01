@@ -20,7 +20,7 @@ C_INCLUDE_DIRS = $(JAVA_HOME)/include $(JAVA_HOME)/include/linux $(dir $(JNI_HEA
 CFLAGS = $(foreach d, $(C_INCLUDE_DIRS), -I $d) -std=c99 -shared -fPIC
 
 
-#all: $(C_LIB) java_classes
+all: $(C_LIB) java_classes
 
 java_classes: $(JAVA_SRCS)
 	mkdir -p $(JAVA_BIN) && $(JC) $(JFLAGS) $^

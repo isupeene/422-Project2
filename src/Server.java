@@ -7,12 +7,7 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.ServerSocket;
 
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-
 import encryption.FeistelCipher;
-import static encryption.BytePadding.padTo8Bytes;
-import static encryption.BytePadding.unpadBytes;
 
 import config.Config;
 import config.ConfigException;
@@ -50,9 +45,7 @@ class Server
 				String base64Filename = clientReader.readLine();
 				if (base64Filename == null) break;
 
-				byte[] filenameBytes = decodeBase64(base64Filename);
-				cipher.decrypt(filenameBytes);
-				String filename = new String(unpadBytes(filenameBytes));
+				String filename = cipher.decrypt(base64Filename);
 				System.out.println("Got a request for " + filename);
 				
 				byte[] fileBytes = null;				
@@ -66,18 +59,11 @@ class Server
 				{
 					ex.printStackTrace();
 
-					String errorMessage = "Couldn't read the file. :(";
-					byte[] errorBytes = padTo8Bytes(errorMessage.getBytes());
-					cipher.encrypt(errorBytes);
-					String base64Error = encodeBase64String(errorBytes);
-					clientWriter.println(base64Error);
+					clientWriter.println(cipher.encrypt("Couldn't read the file. :("));
 					continue;
 				}
 				
-				fileBytes = padTo8Bytes(fileBytes);
-				cipher.encrypt(fileBytes);
-				String base64File = encodeBase64String(fileBytes);
-				clientWriter.println(base64File);
+				clientWriter.println(cipher.encrypt(fileBytes));
 			}
 		}
 		catch (IOException ex) {} // The thread died - that's OK.

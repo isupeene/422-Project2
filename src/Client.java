@@ -2,14 +2,9 @@ import config.Config;
 import config.ConfigException;
 
 import encryption.FeistelCipher;
-import static encryption.BytePadding.padTo8Bytes;
-import static encryption.BytePadding.unpadBytes;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -71,17 +66,8 @@ public class Client
 		writer.println(args.username);
 		while (true)
 		{
-			String filename = console.readLine();
-			byte[] filenameBytes = padTo8Bytes(filename.getBytes());
-			cipher.encrypt(filenameBytes);
-			String base64Filename = encodeBase64String(filenameBytes);
-			writer.println(base64Filename);
-
-			String base64Response = reader.readLine();
-			byte[] responseBytes = decodeBase64(base64Response);
-			cipher.decrypt(responseBytes);
-			String response = new String(unpadBytes(responseBytes));
-			System.out.println(response);
+			writer.println(cipher.encrypt(console.readLine()));
+			System.out.println(cipher.decrypt(reader.readLine()));
 		}
 	}
 }

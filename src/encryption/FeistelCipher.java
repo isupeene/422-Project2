@@ -2,6 +2,9 @@ package encryption;
 
 import java.util.Arrays;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+
 public class FeistelCipher
 {
 	static
@@ -31,16 +34,27 @@ public class FeistelCipher
 		}
 	}
 
-	public void encrypt(byte[] data)
+	public String encrypt(String plaintext)
 	{
-		checkDataLength(data);
-		encryptImpl(data, key);
+		return encrypt(plaintext.getBytes());
 	}
 
-	public void decrypt(byte[] data)
+	public String decrypt(String ciphertext)
 	{
-		checkDataLength(data);
-		decryptImpl(data, key);
+		return decrypt(decodeBase64(ciphertext));
+	}
+
+	public String encrypt(byte[] plaintext)
+	{
+		byte[] ciphertext = BytePadding.padTo8Bytes(plaintext);
+		encryptImpl(ciphertext, key);
+		return encodeBase64String(ciphertext);
+	}
+
+	public String decrypt(byte[] ciphertext)
+	{
+		decryptImpl(ciphertext, key);
+		return new String(BytePadding.unpadBytes(ciphertext));
 	}
 
 	private static native void encryptImpl(byte[] data, int[] key);

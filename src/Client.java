@@ -1,8 +1,15 @@
 import config.Config;
 import config.ConfigException;
 
+import encryption.FeistelCipher;
+import static encryption.BytePadding.padTo8Bytes;
+import static encryption.BytePadding.unpadBytes;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -47,6 +54,7 @@ public class Client
 	{
 		Arguments args = parseArgs(argv);
 		int[] key = Config.getKey(args.username);
+		FeistelCipher cipher = new FeistelCipher(key);
 
 		// Here, we assume that we are on the same machine.
 		Socket sock = new Socket("127.0.0.1", 16000);
@@ -59,11 +67,20 @@ public class Client
 			new InputStreamReader(System.in)
 		);
 
+
+		writer.println(args.username);
 		while (true)
 		{
 			String filename = console.readLine();
-			writer.println(filename);
-			String response = reader.readLine();
+			byte[] filenameBytes = padTo8Bytes(filename.getBytes());
+			cipher.encrypt(filenameBytes);
+			String base64Filename = encodeBase64String(filenameBytes);
+			writer.println(base64Filename);
+
+			String base64Response = reader.readLine();
+			byte[] responseBytes = decodeBase64(base64Response);
+			cipher.decrypt(responseBytes);
+			String response = new String(unpadBytes(responseBytes));
 			System.out.println(response);
 		}
 	}

@@ -32,7 +32,7 @@ $(C_LIB): $(C_SRC) $(JNI_HEADER)
 	mkdir -p $(dir $@) && $(CC) $(CFLAGS) $< -o $@
 
 tar:
-	tar -czf isupeene-assignment1.tar.gz Makefile README.txt LICENSE.txt *.sh src/ lib/ doc/
+	tar -czf isupeene-assignment2.tar.gz Makefile README.txt LICENSE.txt *.sh src/ lib/ doc/
 
 clean:
 	rm -rf include/ bin/

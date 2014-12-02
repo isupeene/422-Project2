@@ -49,6 +49,11 @@ public class Client
 	{
 		Arguments args = parseArgs(argv);
 		int[] key = Config.getKey(args.username);
+		if (key == null)
+		{
+			System.out.println("Invalid username: " + args.username);
+			System.exit(1);
+		}
 		FeistelCipher cipher = new FeistelCipher(key);
 
 		// Here, we assume that we are on the same machine.
@@ -63,7 +68,7 @@ public class Client
 		);
 
 
-		writer.println(args.username);
+		writer.println(cipher.encrypt(args.username));
 		while (true)
 		{
 			writer.println(cipher.encrypt(console.readLine()));

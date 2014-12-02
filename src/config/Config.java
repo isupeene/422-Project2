@@ -81,5 +81,12 @@ public class Config
 
 		return keys.get(username);
 	}
+
+	public static Iterable<Map.Entry<String, int[]>> iterateKeys() throws ConfigException
+	{
+		if (initializationError != null) throw initializationError;
+
+		return keys.entrySet();
+	}
 }
 

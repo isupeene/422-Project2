@@ -12,6 +12,8 @@ import encryption.FeistelCipher;
 import config.Config;
 import config.ConfigException;
 
+import java.util.Map;
+
 class Server
 {
 	public static void main(String[] args) throws IOException
@@ -27,6 +29,19 @@ class Server
 		}
 	}
 
+	private static int[] findKey(String encryptedUsername) throws ConfigException
+	{
+		for (Map.Entry<String, int[]> pair : Config.iterateKeys())
+		{
+			if (new FeistelCipher(pair.getValue()).decrypt(encryptedUsername).equals(pair.getKey()))
+			{
+				System.out.println("Accepted a new user: " + pair.getKey());
+				return pair.getValue();
+			}
+		}
+		return null;
+	}
+
 	private static void handleClient(Socket clientSock)
 	{
 		try
@@ -36,10 +51,16 @@ class Server
 			);
 			PrintWriter clientWriter = new PrintWriter(clientSock.getOutputStream(), true);
 			String username = clientReader.readLine();
-			int[] key = Config.getKey(username);
-			System.out.println("Accepted a new user: " + username);
-			FeistelCipher cipher = new FeistelCipher(key);
 
+			int[] key = findKey(username);
+			if (key == null)
+			{
+				System.out.println("No matching user.");
+				clientSock.close();
+				return;
+			}
+
+			FeistelCipher cipher = new FeistelCipher(key);
 			while (true)
 			{
 				String base64Filename = clientReader.readLine();
